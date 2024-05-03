@@ -1,5 +1,5 @@
 const router = require("koa-router")();
-const { login, registerCheck } = require("../controller/blog/user");
+const { login, registerCheck } = require("../controller/user");
 const { ErrorModel, SuccessModel } = require("../model/blogResModel");
 
 router.prefix("/api/user");

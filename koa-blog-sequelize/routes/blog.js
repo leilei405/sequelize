@@ -5,7 +5,7 @@ const {
   createBlogArticle,
   deleteBlogArticle,
   updateBlogArticle,
-} = require("../controller/blog/blog");
+} = require("../controller/blog");
 const { SuccessModel, ErrorModel } = require("../model/blogResModel");
 const loginCheck = require("../middleware/loginCheck");
 
