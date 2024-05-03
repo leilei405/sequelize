@@ -1,4 +1,5 @@
 const Sequelize = require("sequelize");
+const xss = require("xss");
 const Blog = require("../db/model/Blog");
 
 /**
@@ -31,9 +32,13 @@ async function getBlogList(author = "", keyword = "") {
  * @returns 返回匹配到的博客对象
  */
 async function getBlogDetail(id = "") {
-  return await Blog.findOne({
+  const list = await Blog.findOne({
     where: { id },
   });
+
+  if (list) return null;
+
+  return list.dataValues;
 }
 
 /**
@@ -43,7 +48,18 @@ async function getBlogDetail(id = "") {
  * @returns 返回创建的博客文章对象
  */
 async function createBlogArticle(blogData = {}) {
-  return await Blog.create(blogData);
+  const title = xss(blogData.title);
+  const content = xss(blogData.content);
+  const author = blogData.author; // 系统自己赋值的属性 比较安全
+  const res = await Blog.create({
+    title,
+    content,
+    author,
+  });
+
+  return {
+    id: res.dataValues.id,
+  };
 }
 
 /**
@@ -54,9 +70,21 @@ async function createBlogArticle(blogData = {}) {
  * @returns 返回Promise对象，解析后返回更新后的博客数据
  */
 async function updateBlogArticle(id = "", blogData = {}) {
-  return await Blog.update(blogData, {
-    where: { id },
-  });
+  const title = xss(blogData.title);
+  const content = xss(blogData.content);
+
+  const res = await Blog.update(
+    {
+      title,
+      content,
+    },
+    {
+      where: { id },
+    }
+  );
+
+  if (res[0] >= 1) return true;
+  return false;
 }
 
 /**
@@ -67,9 +95,12 @@ async function updateBlogArticle(id = "", blogData = {}) {
  * @returns 返回删除结果
  */
 async function deleteBlogArticle(id = "", author = "") {
-  return await Blog.destroy({
+  const res = await Blog.destroy({
     where: { id, author },
   });
+
+  if (res >= 1) return true;
+  return false;
 }
 
 module.exports = {
